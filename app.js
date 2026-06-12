@@ -511,7 +511,7 @@ function renderFinalTrophy() {
       <div class="trophy-medal ${trophy.className}" aria-hidden="true">${trophy.icon}</div>
       <p class="support-text">Esame finale verbalizzato</p>
       <h3 class="prompt">${escapeHtml(trophy.title)}</h3>
-      <p class="score-value">${escapeHtml(grade.label)}${grade.hasLode ? "" : "<span>/110</span>"}</p>
+      <p class="score-value">${escapeHtml(grade.label)}${grade.hasLode ? "" : "<span>/30</span>"}</p>
       <p class="score-details">${correctAnswers}/${grade.maxCorrectAnswers} risposte corrette · ${wrongAnswers} malus</p>
       <p class="message">${escapeHtml(trophy.message)}</p>
     </div>
@@ -521,11 +521,11 @@ function renderFinalTrophy() {
 function calculateFinalGrade() {
   const maxCorrectAnswers = getMaxCorrectAnswers();
   const perfectRun = correctAnswers === maxCorrectAnswers && wrongAnswers === 0;
-  const correctScore = maxCorrectAnswers ? (correctAnswers / maxCorrectAnswers) * 110 : 0;
-  const score = Math.max(0, Math.min(110, Math.round(correctScore - wrongAnswers * 4)));
+  const correctScore = maxCorrectAnswers ? (correctAnswers / maxCorrectAnswers) * 30 : 18;
+  const score = Math.max(18, Math.min(30, Math.round(correctScore - wrongAnswers)));
   return {
     hasLode: perfectRun,
-    label: perfectRun ? "110 e lode" : score.toString(),
+    label: perfectRun ? "30 e lode" : score.toString(),
     maxCorrectAnswers,
     score
   };
@@ -551,11 +551,11 @@ function getTrophy(grade) {
     return {
       className: "is-gold",
       icon: "★",
-      title: "Trofeo 110 e lode",
+      title: "Trofeo 30 e lode",
       message: "La commissione si alza in piedi. Qualcuno propone di farvi direttamente tutor."
     };
   }
-  if (grade.score >= 100) {
+  if (grade.score >= 28) {
     return {
       className: "is-gold",
       icon: "★",
@@ -563,7 +563,7 @@ function getTrophy(grade) {
       message: "Prestazione brillante: avete perso la lode per un dettaglio, probabilmente colpa della burocrazia."
     };
   }
-  if (grade.score >= 80) {
+  if (grade.score >= 24) {
     return {
       className: "is-silver",
       icon: "◆",
@@ -571,7 +571,7 @@ function getTrophy(grade) {
       message: "Ottima media, passo deciso e panico sotto controllo. Il campus vi saluta con rispetto."
     };
   }
-  if (grade.score >= 60) {
+  if (grade.score >= 18) {
     return {
       className: "is-bronze",
       icon: "●",
