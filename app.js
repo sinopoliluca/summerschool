@@ -5,11 +5,11 @@ const steps = [
     title: "Modalità matricola attivata",
     prompt: "Dove vanno gli studenti universitari quando hanno fame?",
     options: [
-      "a casa della nonna",
-      "presso la segreteria studenti",
-      "nella mensa universitaria",
-      "presso la segreteria didattica",
-      "in aula studio"
+      "casa della nonna",
+      "segreteria studenti",
+      "mensa universitaria",
+      "segreteria didattica",
+      "aula studio"
     ],
     answer: "mensa universitaria",
     success: "Corretto, è la mensa universitaria.\n\nOra trovatela. La mappa può aiutarvi!"
