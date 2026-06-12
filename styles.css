@@ -30,6 +30,11 @@ body {
   overflow-x: hidden;
 }
 
+body.is-app-fullscreen {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 button,
 input {
   font: inherit;
@@ -46,7 +51,22 @@ input {
   position: fixed;
   inset: 0;
   z-index: 20;
+  width: 100%;
+  height: var(--app-height, 100dvh);
+  min-height: var(--app-height, 100dvh);
+  padding: 0;
   overflow: auto;
+}
+
+.app-shell.is-window-fullscreen .screen {
+  width: 100%;
+  min-height: var(--app-height, 100dvh);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.app-shell.is-window-fullscreen .game-screen {
+  min-height: var(--app-height, 100dvh);
 }
 
 .screen {

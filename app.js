@@ -160,6 +160,10 @@ startButton.addEventListener("click", () => {
 backButton.addEventListener("click", goBack);
 fullscreenButton.addEventListener("click", toggleFullscreen);
 document.addEventListener("fullscreenchange", updateFullscreenButton);
+window.addEventListener("resize", updateAppHeight);
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", updateAppHeight);
+}
 
 function resetRuntimeState() {
   clearInterval(timerId);
@@ -699,16 +703,17 @@ function updateBackButton() {
 }
 
 async function toggleFullscreen() {
+  const isFullscreen = document.fullscreenElement || appShell.classList.contains("is-window-fullscreen");
   try {
-    if (document.fullscreenElement) {
-      await document.exitFullscreen();
-    } else if (appShell.requestFullscreen) {
-      await appShell.requestFullscreen();
+    if (isFullscreen) {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      setAppFullscreen(false);
     } else {
-      appShell.classList.toggle("is-window-fullscreen");
+      setAppFullscreen(true);
+      if (appShell.requestFullscreen) await appShell.requestFullscreen();
     }
   } catch {
-    appShell.classList.toggle("is-window-fullscreen");
+    setAppFullscreen(!isFullscreen);
   }
   updateFullscreenButton();
 }
@@ -717,6 +722,20 @@ function updateFullscreenButton() {
   const isFullscreen = Boolean(document.fullscreenElement) || appShell.classList.contains("is-window-fullscreen");
   fullscreenIcon.textContent = isFullscreen ? "×" : "⛶";
   fullscreenButton.setAttribute("aria-label", isFullscreen ? "Esci da schermo intero" : "Schermo intero");
+}
+
+function setAppFullscreen(enabled) {
+  updateAppHeight();
+  appShell.classList.toggle("is-window-fullscreen", enabled);
+  document.body.classList.toggle("is-app-fullscreen", enabled);
+  if (enabled) {
+    window.setTimeout(() => window.scrollTo(0, 1), 80);
+  }
+}
+
+function updateAppHeight() {
+  const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  document.documentElement.style.setProperty("--app-height", `${height}px`);
 }
 
 function panel(markup) {
