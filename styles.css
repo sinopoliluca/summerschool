@@ -333,10 +333,45 @@ h1 {
   border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.08);
+  cursor: zoom-in;
+  transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease;
+  transform-origin: center;
+}
+
+.badge-card:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 4px;
+}
+
+.badge-card.is-zoomed {
+  position: fixed;
+  z-index: 5;
+  top: 50%;
+  left: 50%;
+  width: min(86vw, 360px);
+  margin: 0;
+  padding: 22px;
+  background: rgba(8, 24, 20, 0.96);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.68);
+  cursor: zoom-out;
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.badge-zoom-active::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(4px);
 }
 
 .badge-ring {
   width: min(58vw, 190px);
+}
+
+.badge-card.is-zoomed .badge-ring {
+  width: min(68vw, 260px);
 }
 
 .badge-ring svg {
@@ -355,6 +390,62 @@ h1 {
 
 .badge-card strong {
   font-size: 1.45rem;
+}
+
+.trophy-box {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.trophy-medal {
+  display: grid;
+  place-items: center;
+  width: min(44vw, 160px);
+  aspect-ratio: 1;
+  border: 7px solid rgba(255, 255, 255, 0.86);
+  border-radius: 50%;
+  color: #06100d;
+  font-size: clamp(3.4rem, 18vw, 5.8rem);
+  font-weight: 900;
+  box-shadow: inset 0 -16px 28px rgba(0, 0, 0, 0.2), 0 22px 52px rgba(0, 0, 0, 0.42);
+}
+
+.trophy-medal.is-gold {
+  background: linear-gradient(135deg, #fff3a8, var(--gold) 56%, #b87525);
+}
+
+.trophy-medal.is-silver {
+  background: linear-gradient(135deg, #ffffff, #b8c4c8 58%, #6e7f84);
+}
+
+.trophy-medal.is-bronze {
+  background: linear-gradient(135deg, #ffd0a0, #c98248 58%, #744321);
+}
+
+.trophy-medal.is-green {
+  background: linear-gradient(135deg, var(--mint), #4ba37a 60%, #17392f);
+}
+
+.score-value {
+  margin: 0;
+  color: var(--gold);
+  font-size: clamp(4rem, 18vw, 6.6rem);
+  line-height: 0.86;
+  font-weight: 900;
+  text-shadow: 0 12px 30px rgba(0, 0, 0, 0.38);
+}
+
+.score-value span {
+  color: var(--muted);
+  font-size: 0.3em;
+}
+
+.score-details {
+  margin: 0;
+  color: var(--mint);
+  font-weight: 900;
 }
 
 .stress-head {

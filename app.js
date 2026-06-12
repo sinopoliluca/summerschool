@@ -46,27 +46,27 @@ const steps = [
   },
   {
     type: "message",
-    cycle: "Missione 2 - ",
+    cycle: "Missione 2 - Nessuno escluso",
     title: "Nuova destinazione",
     message: "Raggiungete il nuovo luogo: Unifi Include.\n\nTrovatelo, la mappa può aiutarvi!"
   },
   {
     type: "password",
-    cycle: "Ciclo 3 - Fase 2",
+    cycle: "Missione 2 - Nessuno escluso",
     title: "Password",
     prompt: "Inserite la password trovata da Unifi Include.",
     answer: "INCLUSIONE"
   },
   {
     type: "chaosGame",
-    cycle: "Ciclo 4 - Fase 1",
+    cycle: "Missione 2 - Nessuno escluso",
     title: "Il Caos della Matricola",
     intro: "Siete i nuovi assistenti di Unifi Include. Dovete aiutare le matricole a trovare il servizio giusto prima che vadano nel panico.",
     timeLimit: 10,
     options: [
-      "📚 Piano Individuale di Supporto allo Studio",
       "🏃 Carriera Duale Studente-Atleta",
-      "🪪 Carriera Alias"
+      "🪪 Carriera Alias",
+      "📚 Piano Individuale di Supporto allo Studio"
     ],
     scenarios: [
       {
@@ -90,7 +90,7 @@ const steps = [
   },
   {
     type: "fillBlank",
-    cycle: "Ciclo 4 - Fase 1",
+    cycle: "Missione 3 - La corona d'alloro",
     title: "Manuale introvabile",
     prompt: "Sei una matricola. Hai appena speso quasi tutti i tuoi soldi per l'abbonamento dei mezzi, qualche pranzo alla mensa universitaria e il concerto di TonyPitony. Scopri che per preparare un esame ti serve un manuale di 800 pagine che costa 72 euro. Dove puoi leggerlo gratis?",
     placeholder: "",
@@ -99,7 +99,7 @@ const steps = [
   },
   {
     type: "password",
-    cycle: "Ciclo 4 - Fase 2",
+    cycle: "Missione 3 - La corona d'alloro",
     title: "Codice orario",
     prompt: "Inserite il codice a quattro cifre",
     placeholder: "__:__",
@@ -108,7 +108,7 @@ const steps = [
   },
   {
     type: "message",
-    cycle: "Missione finale",
+    cycle: "Missione 4 - Il boss finale",
     title: "FIRST LAB",
     message: "Andate al FIRST LAB.\n\nTrovatelo. La mappa può aiutarvi!",
     final: true
@@ -123,25 +123,19 @@ const stepLabel = document.querySelector("#stepLabel");
 const stepTitle = document.querySelector("#stepTitle");
 const progressFill = document.querySelector("#progressFill");
 const startButton = document.querySelector("#startButton");
-const resetButton = document.querySelector("#resetButton");
 
 let currentStep = 0;
 let sequenceIndex = 0;
 let chaosIndex = 0;
 let timerId = null;
 let timerStartedAt = 0;
+let correctAnswers = 0;
+let wrongAnswers = 0;
 
 startButton.addEventListener("click", () => {
   introScreen.classList.add("is-hidden");
   gameScreen.classList.remove("is-hidden");
   renderStep();
-});
-
-resetButton.addEventListener("click", () => {
-  resetRuntimeState();
-  currentStep = 0;
-  introScreen.classList.remove("is-hidden");
-  gameScreen.classList.add("is-hidden");
 });
 
 function resetRuntimeState() {
@@ -150,6 +144,7 @@ function resetRuntimeState() {
   sequenceIndex = 0;
   chaosIndex = 0;
   appShell.classList.remove("shake-low", "shake-mid", "shake-high");
+  closeBadgeZoom();
 }
 
 function renderStep() {
@@ -205,6 +200,7 @@ function renderQuizSequence(step) {
       }
       disableCurrentChoices();
       button.classList.add("is-correct");
+      recordCorrectAnswer();
       sequenceIndex += 1;
       setTimeout(() => {
         if (sequenceIndex < step.questions.length) {
@@ -254,12 +250,14 @@ function setupTextAnswer(step, successMessage = null) {
     const submitted = normalize(input.value);
     const expected = normalize(step.answer);
     if (submitted === expected) {
+      recordCorrectAnswer();
       if (successMessage) {
         renderSuccess(successMessage, () => advance());
       } else {
         advance();
       }
     } else {
+      recordWrongAnswer();
       feedback.textContent = "Ops, ritenta!";
       input.select();
       form.animate(
@@ -276,16 +274,11 @@ function setupTextAnswer(step, successMessage = null) {
 }
 
 function renderMessage(step) {
-  const buttonLabel = step.final ? "Ricomincia" : "Avanti";
-  const action = step.final
-    ? () => {
-        resetRuntimeState();
-        currentStep = 0;
-        introScreen.classList.remove("is-hidden");
-        gameScreen.classList.add("is-hidden");
-      }
-    : () => advance();
-  renderSuccess(step.message, action, false, buttonLabel);
+  if (step.final) {
+    renderFinalTrophy(step.message);
+    return;
+  }
+  renderSuccess(step.message, () => advance(), false, "Avanti");
 }
 
 function renderChaosIntro(step) {
@@ -332,6 +325,7 @@ function renderChaosScenario(step) {
       timerId = null;
       appShell.classList.remove("shake-low", "shake-mid", "shake-high");
       button.classList.add("is-correct");
+      recordCorrectAnswer();
       chaosIndex += 1;
       setTimeout(() => {
         if (chaosIndex < step.scenarios.length) {
@@ -360,6 +354,7 @@ function updateStress(step) {
     clearInterval(timerId);
     timerId = null;
     appShell.classList.remove("shake-low", "shake-mid", "shake-high");
+    recordWrongAnswer(2);
     window.alert("Ops! La matricola è stata assalita dallo stress. Ritenta");
     renderChaosScenario(step);
   }
@@ -370,12 +365,14 @@ function handleChoice(button, isCorrect, successMessage) {
     handleWrongChoice(button);
     return;
   }
+  recordCorrectAnswer();
   button.classList.add("is-correct");
   disableCurrentChoices();
   setTimeout(() => renderSuccess(successMessage, () => advance()), 360);
 }
 
 function handleWrongChoice(button) {
+  recordWrongAnswer();
   const feedback = contentPanel.querySelector("#feedback");
   button.classList.add("is-wrong");
   if (feedback) feedback.textContent = "Ops, ritenta!";
@@ -398,7 +395,126 @@ function renderSuccess(message, onNext, badge = false, label = "Avanti") {
     </div>
   `);
   contentPanel.querySelector("#nextButton").addEventListener("click", onNext);
+  if (badge) setupBadgeZoom();
 }
+
+function renderFinalTrophy(message) {
+  const score = calculateScore();
+  const trophy = getTrophy(score);
+  progressFill.style.width = "100%";
+  contentPanel.innerHTML = panel(`
+    <div class="trophy-box">
+      <div class="trophy-medal ${trophy.className}" aria-hidden="true">${trophy.icon}</div>
+      <p class="support-text">${escapeHtml(message).replace(/\n/g, "<br>")}</p>
+      <h3 class="prompt">${escapeHtml(trophy.title)}</h3>
+      <p class="score-value">${score}<span>/100</span></p>
+      <p class="score-details">${correctAnswers} risposte corrette · ${wrongAnswers} malus</p>
+      <p class="message">${escapeHtml(trophy.message)}</p>
+    </div>
+  `);
+}
+
+function calculateScore() {
+  const maxCorrectAnswers = getMaxCorrectAnswers();
+  const correctScore = maxCorrectAnswers ? (correctAnswers / maxCorrectAnswers) * 100 : 0;
+  return Math.max(0, Math.min(100, Math.round(correctScore - wrongAnswers * 7)));
+}
+
+function getMaxCorrectAnswers() {
+  return steps.reduce((total, step) => {
+    if (step.type === "quiz" || step.type === "password" || step.type === "fillBlank") {
+      return total + 1;
+    }
+    if (step.type === "quizSequence") {
+      return total + step.questions.length;
+    }
+    if (step.type === "chaosGame") {
+      return total + step.scenarios.length;
+    }
+    return total;
+  }, 0);
+}
+
+function getTrophy(score) {
+  if (score >= 90) {
+    return {
+      className: "is-gold",
+      icon: "★",
+      title: "Trofeo d'oro",
+      message: "Percorso quasi perfetto: avete dominato l'escape room."
+    };
+  }
+  if (score >= 75) {
+    return {
+      className: "is-silver",
+      icon: "◆",
+      title: "Trofeo d'argento",
+      message: "Ottima missione: qualche inciampo, ma squadra solida."
+    };
+  }
+  if (score >= 55) {
+    return {
+      className: "is-bronze",
+      icon: "●",
+      title: "Trofeo di bronzo",
+      message: "Missione completata: siete usciti dalla stanza, con qualche brivido."
+    };
+  }
+  return {
+    className: "is-green",
+    icon: "✓",
+    title: "Trofeo sopravvivenza",
+    message: "Ce l'avete fatta: il campus non vi spaventa più."
+  };
+}
+
+function recordCorrectAnswer() {
+  correctAnswers += 1;
+}
+
+function recordWrongAnswer(amount = 1) {
+  wrongAnswers += amount;
+}
+
+function setupBadgeZoom() {
+  const badge = contentPanel.querySelector(".badge-card");
+  if (!badge) return;
+  badge.setAttribute("tabindex", "0");
+  badge.setAttribute("role", "button");
+  badge.setAttribute("aria-label", "Apri badge Pranzo stellare");
+  badge.addEventListener("click", event => {
+    event.stopPropagation();
+    toggleBadgeZoom();
+  });
+  badge.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      toggleBadgeZoom();
+    }
+  });
+}
+
+function toggleBadgeZoom() {
+  const badge = contentPanel.querySelector(".badge-card");
+  if (!badge) return;
+  const isOpen = badge.classList.toggle("is-zoomed");
+  gameScreen.classList.toggle("badge-zoom-active", isOpen);
+  badge.setAttribute("aria-label", isOpen ? "Chiudi badge Pranzo stellare" : "Apri badge Pranzo stellare");
+}
+
+function closeBadgeZoom() {
+  const badge = contentPanel.querySelector(".badge-card.is-zoomed");
+  if (!badge) return;
+  badge.classList.remove("is-zoomed");
+  badge.setAttribute("aria-label", "Apri badge Pranzo stellare");
+  gameScreen.classList.remove("badge-zoom-active");
+}
+
+gameScreen.addEventListener("click", event => {
+  if (!gameScreen.classList.contains("badge-zoom-active")) return;
+  if (event.target.closest(".badge-card")) return;
+  closeBadgeZoom();
+});
 
 function advance() {
   currentStep = Math.min(currentStep + 1, steps.length - 1);
