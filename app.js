@@ -95,7 +95,7 @@ const steps = [
     prompt: "Sei una matricola. Hai appena speso quasi tutti i tuoi soldi per l'abbonamento dei mezzi, qualche pranzo alla mensa universitaria e il concerto di TonyPitony. Scopri che per preparare un esame ti serve un manuale di 800 pagine che costa 72 euro. Dove puoi leggerlo gratis?",
     placeholder: "",
     answer: "BIBLIOTECA",
-    success: "Trovatela. La mappa può aiutarvi!"
+    success: "Esatto! Trovate la biblioteca. La mappa può aiutarvi!"
   },
   {
     type: "password",
@@ -355,9 +355,21 @@ function updateStress(step) {
     timerId = null;
     appShell.classList.remove("shake-low", "shake-mid", "shake-high");
     recordWrongAnswer(2);
-    window.alert("Ops! La matricola è stata assalita dallo stress. Ritenta");
-    renderChaosScenario(step);
+    renderStressRetry(step);
   }
+}
+
+function renderStressRetry(step) {
+  contentPanel.innerHTML = panel(`
+    <div class="stress-retry">
+      <div class="student-avatar is-stressed" aria-hidden="true"></div>
+      <p class="eyebrow">Stress al massimo</p>
+      <h3 class="prompt">Ops! La matricola è stata assalita dallo stress.</h3>
+      <p class="support-text">Riprovate la stessa situazione e scegliete il servizio giusto prima che la barra si riempia.</p>
+      <button class="next-button" type="button" id="retryStress">Ritenta</button>
+    </div>
+  `);
+  contentPanel.querySelector("#retryStress").addEventListener("click", () => renderChaosScenario(step));
 }
 
 function handleChoice(button, isCorrect, successMessage) {
