@@ -52,14 +52,27 @@ input {
 }
 
 .intro-screen {
+  position: relative;
   display: grid;
   align-content: end;
-  background:
-    linear-gradient(180deg, rgba(4, 12, 10, 0.02), rgba(4, 12, 10, 0.16) 58%, rgba(4, 12, 10, 0.7)),
-    url("assets/summer-school-cover-web.jpg") left center / cover;
+  justify-items: center;
+  overflow: hidden;
+  background: #07130f;
+}
+
+.intro-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center top;
+  background: #07130f;
 }
 
 .intro-copy {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 620px;
   padding-bottom: 4svh;
@@ -452,5 +465,25 @@ h1 {
 
   .game-screen {
     min-height: min(900px, calc(100svh - 48px));
+  }
+}
+
+@media (max-width: 420px) {
+  .intro-screen {
+    padding-inline: 14px;
+  }
+
+  .intro-copy {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-height: 700px) {
+  .intro-screen {
+    padding-block: 14px;
+  }
+
+  .intro-copy {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
   }
 }
