@@ -485,6 +485,26 @@ h1 {
   font-weight: 900;
 }
 
+.letter-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0 18px;
+}
+
+.letter-tile {
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  color: #06100d;
+  background: linear-gradient(135deg, var(--gold), #ffe9a8);
+  font-size: 1.35rem;
+  font-weight: 900;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
+}
+
 .stress-head {
   display: flex;
   justify-content: space-between;

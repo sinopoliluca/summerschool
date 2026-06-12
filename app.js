@@ -111,7 +111,15 @@ const steps = [
     cycle: "Missione 4 - Il boss finale",
     title: "FIRST LAB",
     message: "Andate al FIRST LAB.\n\nTrovatelo. La mappa può aiutarvi!",
-    final: true
+    buttonLabel: "Trovato!"
+  },
+  {
+    type: "wordPuzzle",
+    cycle: "Missione 4 - Il boss finale",
+    title: "Orientamento scomposto",
+    prompt: "Le lettere sono andate nel panico da open day. Rimettetele in ordine.",
+    scrambled: ["M", "E", "T", "O", "R", "I", "N", "A", "T", "O", "E", "N"],
+    answer: "ORIENTAMENTO"
   }
 ];
 
@@ -177,6 +185,7 @@ function renderStep(resetLocalState = true) {
   if (step.type === "message") renderMessage(step);
   if (step.type === "chaosGame") renderChaosIntro(step);
   if (step.type === "fillBlank") renderFillBlank(step);
+  if (step.type === "wordPuzzle") renderWordPuzzle(step);
   updateBackButton();
 }
 
@@ -299,11 +308,49 @@ function setupTextAnswer(step, successMessage = null) {
 
 function renderMessage(step) {
   currentView = { kind: "message" };
-  if (step.final) {
-    renderFinalTrophy(step.message);
-    return;
-  }
-  renderSuccess(step.message, () => advance(), false, "Avanti");
+  renderSuccess(step.message, () => advance(), false, step.buttonLabel || "Avanti");
+}
+
+function renderWordPuzzle(step) {
+  currentView = { kind: "wordPuzzle" };
+  contentPanel.innerHTML = panel(`
+    <p class="support-text">Boss finale</p>
+    <h3 class="prompt">${escapeHtml(step.prompt)}</h3>
+    <div class="letter-board" aria-label="Lettere scombinate">
+      ${step.scrambled.map(letter => `<span class="letter-tile">${escapeHtml(letter)}</span>`).join("")}
+    </div>
+    <form class="text-form" id="textForm">
+      <input class="text-input" id="textInput" type="text" inputmode="text" autocomplete="off" placeholder="Scrivi la parola" aria-label="Parola ricomposta">
+      <button class="text-submit" type="submit">Conferma</button>
+    </form>
+    <p class="feedback" id="feedback"></p>
+  `);
+
+  const form = contentPanel.querySelector("#textForm");
+  const input = contentPanel.querySelector("#textInput");
+  const feedback = contentPanel.querySelector("#feedback");
+  input.focus();
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    if (sameAnswer(input.value, step.answer)) {
+      pushHistory();
+      recordCorrectAnswer();
+      renderFinalTrophy();
+    } else {
+      recordWrongAnswer();
+      feedback.textContent = "Quasi, ma l'orientamento è ancora disorientato.";
+      input.select();
+      form.animate(
+        [
+          { transform: "translateX(0)" },
+          { transform: "translateX(-8px)" },
+          { transform: "translateX(8px)" },
+          { transform: "translateX(0)" }
+        ],
+        { duration: 240 }
+      );
+    }
+  });
 }
 
 function renderChaosIntro(step) {
@@ -448,32 +495,41 @@ function renderSuccess(message, onNext, badge = false, label = "Avanti") {
   if (badge) setupBadgeZoom();
 }
 
-function renderFinalTrophy(message) {
-  currentView = { kind: "finalTrophy", message };
-  const score = calculateScore();
-  const trophy = getTrophy(score);
+function renderFinalTrophy() {
+  currentView = { kind: "finalTrophy" };
+  const grade = calculateFinalGrade();
+  const trophy = getTrophy(grade);
+  stepLabel.textContent = "Risultato finale";
+  stepTitle.textContent = "Libretto dell'escape room";
   progressFill.style.width = "100%";
   contentPanel.innerHTML = panel(`
     <div class="trophy-box">
       <div class="trophy-medal ${trophy.className}" aria-hidden="true">${trophy.icon}</div>
-      <p class="support-text">${escapeHtml(message).replace(/\n/g, "<br>")}</p>
+      <p class="support-text">Esame finale verbalizzato</p>
       <h3 class="prompt">${escapeHtml(trophy.title)}</h3>
-      <p class="score-value">${score}<span>/100</span></p>
-      <p class="score-details">${correctAnswers} risposte corrette · ${wrongAnswers} malus</p>
+      <p class="score-value">${escapeHtml(grade.label)}${grade.hasLode ? "" : "<span>/110</span>"}</p>
+      <p class="score-details">${correctAnswers}/${grade.maxCorrectAnswers} risposte corrette · ${wrongAnswers} malus</p>
       <p class="message">${escapeHtml(trophy.message)}</p>
     </div>
   `);
 }
 
-function calculateScore() {
+function calculateFinalGrade() {
   const maxCorrectAnswers = getMaxCorrectAnswers();
-  const correctScore = maxCorrectAnswers ? (correctAnswers / maxCorrectAnswers) * 100 : 0;
-  return Math.max(0, Math.min(100, Math.round(correctScore - wrongAnswers * 7)));
+  const perfectRun = correctAnswers === maxCorrectAnswers && wrongAnswers === 0;
+  const correctScore = maxCorrectAnswers ? (correctAnswers / maxCorrectAnswers) * 110 : 0;
+  const score = Math.max(0, Math.min(110, Math.round(correctScore - wrongAnswers * 4)));
+  return {
+    hasLode: perfectRun,
+    label: perfectRun ? "110 e lode" : score.toString(),
+    maxCorrectAnswers,
+    score
+  };
 }
 
 function getMaxCorrectAnswers() {
   return steps.reduce((total, step) => {
-    if (step.type === "quiz" || step.type === "password" || step.type === "fillBlank") {
+    if (step.type === "quiz" || step.type === "password" || step.type === "fillBlank" || step.type === "wordPuzzle") {
       return total + 1;
     }
     if (step.type === "quizSequence") {
@@ -486,36 +542,44 @@ function getMaxCorrectAnswers() {
   }, 0);
 }
 
-function getTrophy(score) {
-  if (score >= 90) {
+function getTrophy(grade) {
+  if (grade.hasLode) {
     return {
       className: "is-gold",
       icon: "★",
-      title: "Trofeo d'oro",
-      message: "Percorso quasi perfetto: avete dominato l'escape room."
+      title: "Trofeo 110 e lode",
+      message: "La commissione si alza in piedi. Qualcuno propone di farvi direttamente tutor."
     };
   }
-  if (score >= 75) {
+  if (grade.score >= 100) {
+    return {
+      className: "is-gold",
+      icon: "★",
+      title: "Trofeo quasi lode",
+      message: "Prestazione brillante: avete perso la lode per un dettaglio, probabilmente colpa della burocrazia."
+    };
+  }
+  if (grade.score >= 80) {
     return {
       className: "is-silver",
       icon: "◆",
-      title: "Trofeo d'argento",
-      message: "Ottima missione: qualche inciampo, ma squadra solida."
+      title: "Trofeo libretto felice",
+      message: "Ottima media, passo deciso e panico sotto controllo. Il campus vi saluta con rispetto."
     };
   }
-  if (score >= 55) {
+  if (grade.score >= 60) {
     return {
       className: "is-bronze",
       icon: "●",
-      title: "Trofeo di bronzo",
-      message: "Missione completata: siete usciti dalla stanza, con qualche brivido."
+      title: "Trofeo appello superato",
+      message: "Non tutto elegante, ma verbalizzato. Si festeggia alla mensa, con dignità."
     };
   }
   return {
     className: "is-green",
     icon: "✓",
-    title: "Trofeo sopravvivenza",
-    message: "Ce l'avete fatta: il campus non vi spaventa più."
+    title: "Trofeo ci ripenso a settembre",
+    message: "Avete finito vivi, che è già un risultato amministrativamente valido."
   };
 }
 
