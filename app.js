@@ -123,6 +123,7 @@ const stepLabel = document.querySelector("#stepLabel");
 const stepTitle = document.querySelector("#stepTitle");
 const progressFill = document.querySelector("#progressFill");
 const startButton = document.querySelector("#startButton");
+const backButton = document.querySelector("#backButton");
 
 let currentStep = 0;
 let sequenceIndex = 0;
@@ -131,24 +132,36 @@ let timerId = null;
 let timerStartedAt = 0;
 let correctAnswers = 0;
 let wrongAnswers = 0;
+let historyStack = [];
+let currentView = null;
 
 startButton.addEventListener("click", () => {
+  historyStack = [];
+  correctAnswers = 0;
+  wrongAnswers = 0;
+  currentStep = 0;
+  sequenceIndex = 0;
+  chaosIndex = 0;
   introScreen.classList.add("is-hidden");
   gameScreen.classList.remove("is-hidden");
   renderStep();
 });
 
+backButton.addEventListener("click", goBack);
+
 function resetRuntimeState() {
   clearInterval(timerId);
   timerId = null;
-  sequenceIndex = 0;
-  chaosIndex = 0;
   appShell.classList.remove("shake-low", "shake-mid", "shake-high");
   closeBadgeZoom();
 }
 
-function renderStep() {
+function renderStep(resetLocalState = true) {
   resetRuntimeState();
+  if (resetLocalState) {
+    sequenceIndex = 0;
+    chaosIndex = 0;
+  }
   const step = steps[currentStep];
   stepLabel.textContent = step.cycle;
   stepTitle.textContent = step.title;
@@ -160,9 +173,11 @@ function renderStep() {
   if (step.type === "message") renderMessage(step);
   if (step.type === "chaosGame") renderChaosIntro(step);
   if (step.type === "fillBlank") renderFillBlank(step);
+  updateBackButton();
 }
 
 function renderQuiz(step) {
+  currentView = { kind: "quiz" };
   contentPanel.innerHTML = panel(`
     <h3 class="prompt">${escapeHtml(step.prompt)}</h3>
     <div class="choices">
@@ -180,6 +195,7 @@ function renderQuiz(step) {
 }
 
 function renderQuizSequence(step) {
+  currentView = { kind: "quizSequence" };
   const question = step.questions[sequenceIndex];
   contentPanel.innerHTML = panel(`
     <p class="support-text">Domanda ${sequenceIndex + 1} di ${step.questions.length}</p>
@@ -198,6 +214,7 @@ function renderQuizSequence(step) {
         handleWrongChoice(button);
         return;
       }
+      pushHistory();
       disableCurrentChoices();
       button.classList.add("is-correct");
       recordCorrectAnswer();
@@ -214,6 +231,7 @@ function renderQuizSequence(step) {
 }
 
 function renderPassword(step) {
+  currentView = { kind: "password" };
   const placeholder = step.placeholder || "Password";
   contentPanel.innerHTML = panel(`
     <h3 class="prompt">${escapeHtml(step.prompt)}</h3>
@@ -227,6 +245,7 @@ function renderPassword(step) {
 }
 
 function renderFillBlank(step) {
+  currentView = { kind: "fillBlank" };
   contentPanel.innerHTML = panel(`
     <h3 class="prompt">${escapeHtml(step.prompt)}</h3>
     <p class="support-text">${escapeHtml(step.placeholder)}</p>
@@ -250,11 +269,12 @@ function setupTextAnswer(step, successMessage = null) {
     const submitted = normalize(input.value);
     const expected = normalize(step.answer);
     if (submitted === expected) {
+      pushHistory();
       recordCorrectAnswer();
       if (successMessage) {
         renderSuccess(successMessage, () => advance());
       } else {
-        advance();
+        advance(false);
       }
     } else {
       recordWrongAnswer();
@@ -274,6 +294,7 @@ function setupTextAnswer(step, successMessage = null) {
 }
 
 function renderMessage(step) {
+  currentView = { kind: "message" };
   if (step.final) {
     renderFinalTrophy(step.message);
     return;
@@ -282,17 +303,22 @@ function renderMessage(step) {
 }
 
 function renderChaosIntro(step) {
+  currentView = { kind: "chaosIntro" };
   contentPanel.innerHTML = panel(`
     <h3 class="prompt">${escapeHtml(step.intro)}</h3>
     <p class="support-text">Ogni matricola ha 10 secondi prima che lo stress arrivi al massimo.</p>
     <button class="next-button" type="button" id="startChaos">Avvia il gioco</button>
   `);
-  contentPanel.querySelector("#startChaos").addEventListener("click", () => renderChaosScenario(step));
+  contentPanel.querySelector("#startChaos").addEventListener("click", () => {
+    pushHistory();
+    renderChaosScenario(step);
+  });
 }
 
 function renderChaosScenario(step) {
   clearInterval(timerId);
   appShell.classList.remove("shake-low", "shake-mid", "shake-high");
+  currentView = { kind: "chaosScenario" };
   const scenario = step.scenarios[chaosIndex];
   contentPanel.innerHTML = panel(`
     <div class="stress-head">
@@ -320,6 +346,7 @@ function renderChaosScenario(step) {
         handleWrongChoice(button);
         return;
       }
+      pushHistory();
       disableCurrentChoices();
       clearInterval(timerId);
       timerId = null;
@@ -354,12 +381,14 @@ function updateStress(step) {
     clearInterval(timerId);
     timerId = null;
     appShell.classList.remove("shake-low", "shake-mid", "shake-high");
+    pushHistory();
     recordWrongAnswer(2);
     renderStressRetry(step);
   }
 }
 
 function renderStressRetry(step) {
+  currentView = { kind: "stressRetry" };
   contentPanel.innerHTML = panel(`
     <div class="stress-retry">
       <div class="student-avatar is-stressed" aria-hidden="true"></div>
@@ -369,7 +398,10 @@ function renderStressRetry(step) {
       <button class="next-button" type="button" id="retryStress">Ritenta</button>
     </div>
   `);
-  contentPanel.querySelector("#retryStress").addEventListener("click", () => renderChaosScenario(step));
+  contentPanel.querySelector("#retryStress").addEventListener("click", () => {
+    pushHistory();
+    renderChaosScenario(step);
+  });
 }
 
 function handleChoice(button, isCorrect, successMessage) {
@@ -377,6 +409,7 @@ function handleChoice(button, isCorrect, successMessage) {
     handleWrongChoice(button);
     return;
   }
+  pushHistory();
   recordCorrectAnswer();
   button.classList.add("is-correct");
   disableCurrentChoices();
@@ -398,6 +431,7 @@ function disableCurrentChoices() {
 }
 
 function renderSuccess(message, onNext, badge = false, label = "Avanti") {
+  currentView = { kind: "success", message, badge, label };
   const badgeMarkup = badge ? document.querySelector("#spaghettiBadgeTemplate").innerHTML : "";
   contentPanel.innerHTML = panel(`
     <div class="success-box">
@@ -411,6 +445,7 @@ function renderSuccess(message, onNext, badge = false, label = "Avanti") {
 }
 
 function renderFinalTrophy(message) {
+  currentView = { kind: "finalTrophy", message };
   const score = calculateScore();
   const trophy = getTrophy(score);
   progressFill.style.width = "100%";
@@ -528,9 +563,63 @@ gameScreen.addEventListener("click", event => {
   closeBadgeZoom();
 });
 
-function advance() {
+function advance(saveCurrentState = true) {
+  if (saveCurrentState) pushHistory();
   currentStep = Math.min(currentStep + 1, steps.length - 1);
   renderStep();
+}
+
+function pushHistory() {
+  if (!currentView) return;
+  historyStack.push({
+    currentStep,
+    sequenceIndex,
+    chaosIndex,
+    correctAnswers,
+    wrongAnswers,
+    view: { ...currentView }
+  });
+  updateBackButton();
+}
+
+function goBack() {
+  if (!historyStack.length) return;
+  const previousState = historyStack.pop();
+  restoreState(previousState);
+}
+
+function restoreState(state) {
+  resetRuntimeState();
+  currentStep = state.currentStep;
+  sequenceIndex = state.sequenceIndex;
+  chaosIndex = state.chaosIndex;
+  correctAnswers = state.correctAnswers;
+  wrongAnswers = state.wrongAnswers;
+
+  const step = steps[currentStep];
+  updateHeader(step);
+
+  if (state.view.kind === "success") {
+    renderSuccess(state.view.message, () => advance(), state.view.badge, state.view.label);
+  } else if (state.view.kind === "finalTrophy") {
+    renderFinalTrophy(state.view.message);
+  } else if (state.view.kind === "stressRetry") {
+    renderStressRetry(step);
+  } else {
+    renderStep(false);
+  }
+  updateBackButton();
+}
+
+function updateHeader(step) {
+  stepLabel.textContent = step.cycle;
+  stepTitle.textContent = step.title;
+  progressFill.style.width = `${(currentStep / (steps.length - 1)) * 100}%`;
+}
+
+function updateBackButton() {
+  backButton.disabled = historyStack.length === 0;
+  backButton.classList.toggle("is-hidden-control", historyStack.length === 0);
 }
 
 function panel(markup) {
