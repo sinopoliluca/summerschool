@@ -1,29 +1,29 @@
 const steps = [
   {
     type: "quiz",
-    cycle: "Ciclo 1 - Fase 1",
-    title: "Mappa della fame",
-    prompt: "In quale luogo gli studenti universitari possono recarsi quando hanno fame?",
+    cycle: "Missione 1 - Carboidrati",
+    title: "Modalità matricola attivata",
+    prompt: "Dove vanno gli studenti universitari quando hanno fame?",
     options: [
-      "casa della nonna",
-      "segreteria studenti",
-      "mensa universitaria",
-      "segreteria didattica",
-      "aula studio"
+      "a casa della nonna",
+      "presso la segreteria studenti",
+      "nella mensa universitaria",
+      "presso la segreteria didattica",
+      "in aula studio"
     ],
     answer: "mensa universitaria",
-    success: "Corretto, è la Mensa universitaria.\n\nTrovatela. La mappa può aiutarvi!"
+    success: "Corretto, è la mensa universitaria.\n\nOra trovatela. La mappa può aiutarvi!"
   },
   {
     type: "password",
-    cycle: "Ciclo 1 - Fase 2",
+    cycle: "Missione 1 - Carboidrati",
     title: "Password",
-    prompt: "Inserite la password trovata alla Mensa universitaria.",
+    prompt: "Inserite la password trovata alla mensa universitaria.",
     answer: "DSU"
   },
   {
     type: "quizSequence",
-    cycle: "Ciclo 2 - Fase 1",
+    cycle: "Missione 1 - Carboidrati",
     title: "Pranzo stellare",
     finalBadge: true,
     questions: [
@@ -39,14 +39,14 @@ const steps = [
   },
   {
     type: "password",
-    cycle: "Ciclo 2 - Fase 2",
+    cycle: "Missione 1 - Carboidrati",
     title: "Password",
     prompt: "Inserite la password del badge Pranzo stellare.",
     answer: "SPAGHETTI"
   },
   {
     type: "message",
-    cycle: "Ciclo 3 - Fase 1",
+    cycle: "Missione 2 - ",
     title: "Nuova destinazione",
     message: "Raggiungete il nuovo luogo: Unifi Include.\n\nTrovatelo, la mappa può aiutarvi!"
   },
