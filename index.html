@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Escape Room Summer School</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell" id="appShell">
+      <section class="screen intro-screen" id="introScreen" aria-labelledby="introTitle">
+        <div class="intro-copy">
+          <h1 id="introTitle" class="visually-hidden">Summer School di Orientamento 18-19 giugno 2026</h1>
+          <button class="primary-action" id="startButton" type="button">Inizia</button>
+        </div>
+      </section>
+
+      <section class="screen game-screen is-hidden" id="gameScreen" aria-live="polite">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="stepLabel">Ciclo 1</p>
+            <h2 id="stepTitle">Escape Room</h2>
+          </div>
+          <button class="icon-button" id="resetButton" type="button" aria-label="Ricomincia">
+            <span aria-hidden="true">↻</span>
+          </button>
+        </header>
+
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="content-panel" id="contentPanel"></div>
+      </section>
+    </main>
+
+    <template id="spaghettiBadgeTemplate">
+      <div class="badge-card" role="img" aria-label="Badge Pranzo stellare con piatto di spaghetti al sugo">
+        <div class="badge-ring">
+          <svg viewBox="0 0 220 220" aria-hidden="true">
+            <defs>
+              <radialGradient id="plateGlow" cx="50%" cy="45%" r="60%">
+                <stop offset="0%" stop-color="#fffdf3"></stop>
+                <stop offset="72%" stop-color="#f5ecd2"></stop>
+                <stop offset="100%" stop-color="#d9c795"></stop>
+              </radialGradient>
+            </defs>
+            <circle cx="110" cy="110" r="101" fill="#0f3a2f" stroke="#ffffff" stroke-width="7"></circle>
+            <circle cx="110" cy="110" r="76" fill="url(#plateGlow)" stroke="#efdfae" stroke-width="5"></circle>
+            <path d="M62 112c21-24 42-8 58-24 12-12 35-8 47 8" fill="none" stroke="#f2cf6a" stroke-width="12" stroke-linecap="round"></path>
+            <path d="M66 129c19-22 39-8 59-23 14-11 32-7 50 8" fill="none" stroke="#ffd978" stroke-width="10" stroke-linecap="round"></path>
+            <path d="M74 96c20 18 44 18 72-2" fill="none" stroke="#f7d873" stroke-width="9" stroke-linecap="round"></path>
+            <circle cx="99" cy="111" r="12" fill="#c83b2f"></circle>
+            <circle cx="126" cy="102" r="13" fill="#de4a37"></circle>
+            <circle cx="135" cy="128" r="10" fill="#b82d25"></circle>
+            <path d="M154 67l31 75" stroke="#f7f1da" stroke-width="6" stroke-linecap="round"></path>
+            <path d="M164 63l31 75" stroke="#f7f1da" stroke-width="6" stroke-linecap="round"></path>
+          </svg>
+        </div>
+        <p>Badge sbloccato</p>
+        <strong>Pranzo stellare</strong>
+      </div>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
