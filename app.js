@@ -494,11 +494,11 @@ function renderWordPuzzle(step) {
     <p class="support-text">Boss finale</p>
     <h3 class="prompt">${escapeHtml(step.prompt)}</h3>
     <p class="support-text">Cliccate le lettere una alla volta per comporre la parola.</p>
-    <div class="word-slots" id="wordSlots" aria-label="Parola ricomposta">
-      ${step.answer.split("").map(() => `<span class="word-slot"></span>`).join("")}
-    </div>
     <div class="letter-board" aria-label="Lettere scombinate">
       ${letters.map((letter, index) => `<button class="letter-tile" type="button" data-index="${index}" data-letter="${escapeHtml(letter)}">${escapeHtml(letter)}</button>`).join("")}
+    </div>
+    <div class="word-slots" id="wordSlots" aria-label="Parola ricomposta">
+      ${step.answer.split("").map(() => `<span class="word-slot"></span>`).join("")}
     </div>
     <div class="feedback word-feedback" id="feedback">
       ${hintMessage ? `<p class="hint-message">${escapeHtml(hintMessage)}</p>` : ""}
@@ -586,7 +586,11 @@ function renderChaosScenario(step) {
   contentPanel.querySelectorAll(".choice-button").forEach(button => {
     button.addEventListener("click", () => {
       if (!sameAnswer(button.dataset.answer, scenario.answer)) {
-        handleWrongChoice(button);
+        clearInterval(timerId);
+        timerId = null;
+        pushHistory();
+        recordWrongAnswer();
+        renderStressRetry(step, true);
         return;
       }
       pushHistory();
@@ -626,12 +630,13 @@ function updateStress(step) {
     appShell.classList.remove("shake-low", "shake-mid", "shake-high");
     pushHistory();
     recordWrongAnswer(2);
-    renderStressRetry(step);
+    renderStressRetry(step, true);
   }
 }
 
-function renderStressRetry(step) {
+function renderStressRetry(step, shake = false) {
   currentView = { kind: "stressRetry" };
+  appShell.classList.toggle("shake-high", shake);
   contentPanel.innerHTML = panel(`
     <div class="stress-retry">
       <div class="student-avatar is-stressed" aria-hidden="true"></div>
@@ -643,6 +648,7 @@ function renderStressRetry(step) {
   `);
   contentPanel.querySelector("#retryStress").addEventListener("click", () => {
     pushHistory();
+    appShell.classList.remove("shake-low", "shake-mid", "shake-high");
     renderChaosScenario(step);
   });
 }
