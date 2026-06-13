@@ -140,6 +140,8 @@ let timerId = null;
 let timerStartedAt = 0;
 let correctAnswers = 0;
 let wrongAnswers = 0;
+let firstTryCorrectAnswers = 0;
+let currentAnswerHadError = false;
 let historyStack = [];
 let currentView = null;
 
@@ -147,6 +149,8 @@ startButton.addEventListener("click", () => {
   historyStack = [{ view: { kind: "intro" } }];
   correctAnswers = 0;
   wrongAnswers = 0;
+  firstTryCorrectAnswers = 0;
+  currentAnswerHadError = false;
   currentStep = 0;
   sequenceIndex = 0;
   chaosIndex = 0;
@@ -621,7 +625,7 @@ function renderFinalTrophy() {
       <p class="support-text">Esame finale verbalizzato</p>
       <h3 class="prompt">${escapeHtml(trophy.title)}</h3>
       <p class="score-value">${escapeHtml(grade.label)}${grade.hasLode ? "" : "<span>/30</span>"}</p>
-      <p class="score-details">Risposte corrette: ${correctAnswers}/${grade.totalAnswers} · Tentativi errati: ${wrongAnswers}</p>
+      <p class="score-details">Risposte corrette al primo colpo: ${firstTryCorrectAnswers}/${grade.totalAnswers} · Tentativi errati: ${wrongAnswers}</p>
       <p class="message">${escapeHtml(trophy.message)}</p>
       <button class="next-button" type="button" id="showScoreForm">Invia il tuo punteggio</button>
       <form class="score-submit-form is-hidden" id="scoreSubmitForm">
@@ -651,7 +655,7 @@ function setupScoreSubmit(grade) {
     const body = [
       `Nome gruppo: ${groupName}`,
       `Voto finale: ${grade.label}${grade.hasLode ? "" : "/30"}`,
-      `Risposte corrette: ${correctAnswers}/${grade.totalAnswers}`,
+      `Risposte corrette al primo colpo: ${firstTryCorrectAnswers}/${grade.totalAnswers}`,
       `Tentativi errati: ${wrongAnswers}`
     ].join("\n");
     window.location.href = `mailto:orientamento@adm.unifi.it?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -737,10 +741,15 @@ function getTrophy(grade) {
 
 function recordCorrectAnswer() {
   correctAnswers += 1;
+  if (!currentAnswerHadError) {
+    firstTryCorrectAnswers += 1;
+  }
+  currentAnswerHadError = false;
 }
 
 function recordWrongAnswer(amount = 1) {
   wrongAnswers += amount;
+  currentAnswerHadError = true;
 }
 
 function shuffleLetters(word) {
@@ -806,6 +815,8 @@ function pushHistory() {
     chaosIndex,
     correctAnswers,
     wrongAnswers,
+    firstTryCorrectAnswers,
+    currentAnswerHadError,
     view: { ...currentView }
   });
   updateBackButton();
@@ -819,6 +830,10 @@ function goBack() {
     introScreen.classList.remove("is-hidden");
     gameScreen.classList.add("is-hidden");
     historyStack = [];
+    correctAnswers = 0;
+    wrongAnswers = 0;
+    firstTryCorrectAnswers = 0;
+    currentAnswerHadError = false;
     updateBackButton();
     return;
   }
@@ -832,6 +847,8 @@ function restoreState(state) {
   chaosIndex = state.chaosIndex;
   correctAnswers = state.correctAnswers;
   wrongAnswers = state.wrongAnswers;
+  firstTryCorrectAnswers = state.firstTryCorrectAnswers || 0;
+  currentAnswerHadError = Boolean(state.currentAnswerHadError);
 
   const step = steps[currentStep];
   updateHeader(step);
