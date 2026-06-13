@@ -775,11 +775,13 @@ function calculateFinalGrade() {
   const maxCorrectAnswers = getMaxCorrectAnswers();
   const perfectRun = correctAnswers === maxCorrectAnswers && wrongAnswers === 0;
   const missingAnswers = Math.max(0, maxCorrectAnswers - correctAnswers);
-  const score = Math.max(18, Math.min(30, 30 - wrongAnswers - missingAnswers));
+  const penalty = wrongAnswers + missingAnswers;
+  const score = Math.max(18, Math.min(30, 30 - penalty));
   return {
     hasLode: perfectRun,
     label: perfectRun ? "30 e lode" : score.toString(),
     totalAnswers: maxCorrectAnswers,
+    penalty,
     score
   };
 }
@@ -838,6 +840,14 @@ function getTrophy(grade) {
       icon: "●",
       title: "Trofeo appello superato",
       message: "Non tutto elegante, ma verbalizzato. Si festeggia alla mensa, con dignità."
+    };
+  }
+  if (grade.penalty < 12) {
+    return {
+      className: "is-green",
+      icon: "✓",
+      title: "Trofeo sopravvivenza accademica",
+      message: "Voto basso ma cuore alto: avete attraversato il campus con qualche inciampo e molta fantasia."
     };
   }
   return {
