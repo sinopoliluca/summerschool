@@ -110,8 +110,15 @@ const steps = [
     type: "message",
     cycle: "Missione 4 - Il boss finale",
     title: "FIRST LAB",
-    message: "Andate al FIRST LAB.\n\nTrovatelo. La mappa può aiutarvi!",
+    message: "Andate al First Lab.\n\nTrovatelo. La mappa può aiutarvi!",
     buttonLabel: "Trovato!"
+  },
+  {
+    type: "password",
+    cycle: "Missione 4 - Il boss finale",
+    title: "Password",
+    prompt: "Inserite la password del First Lab.",
+    answer: "IMPRESA"
   },
   {
     type: "wordPuzzle",
