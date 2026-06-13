@@ -294,7 +294,6 @@ function setupTextAnswer(step, successMessage = null) {
   const form = contentPanel.querySelector("#textForm");
   const input = contentPanel.querySelector("#textInput");
   const feedback = contentPanel.querySelector("#feedback");
-  input.focus();
   form.addEventListener("submit", event => {
     event.preventDefault();
     const normalize = step.normalize || normalizeAnswer;
@@ -315,7 +314,6 @@ function setupTextAnswer(step, successMessage = null) {
     } else {
       recordWrongAnswer();
       feedback.textContent = "Ops, ritenta!";
-      input.select();
       form.animate(
         [
           { transform: "translateX(0)" },
@@ -360,7 +358,6 @@ function setupTimeAnswer(step) {
   const form = contentPanel.querySelector("#textForm");
   const inputs = [...contentPanel.querySelectorAll(".time-code-input")];
   const feedback = contentPanel.querySelector("#feedback");
-  inputs[0].focus();
 
   inputs.forEach((input, index) => {
     input.addEventListener("input", () => {
@@ -390,7 +387,6 @@ function setupTimeAnswer(step) {
       inputs.forEach(input => {
         input.value = "";
       });
-      inputs[0].focus();
       form.animate(
         [
           { transform: "translateX(0)" },
@@ -621,7 +617,7 @@ function renderFinalTrophy() {
       <p class="support-text">Esame finale verbalizzato</p>
       <h3 class="prompt">${escapeHtml(trophy.title)}</h3>
       <p class="score-value">${escapeHtml(grade.label)}${grade.hasLode ? "" : "<span>/30</span>"}</p>
-      <p class="score-details">${correctAnswers}/${grade.maxCorrectAnswers} risposte corrette · ${wrongAnswers} malus</p>
+      <p class="score-details">Prove superate: ${grade.completedChallenges} · Malus: ${wrongAnswers}</p>
       <p class="message">${escapeHtml(trophy.message)}</p>
     </div>
   `);
@@ -630,12 +626,12 @@ function renderFinalTrophy() {
 function calculateFinalGrade() {
   const maxCorrectAnswers = getMaxCorrectAnswers();
   const perfectRun = correctAnswers === maxCorrectAnswers && wrongAnswers === 0;
-  const correctScore = maxCorrectAnswers ? (correctAnswers / maxCorrectAnswers) * 30 : 18;
-  const score = Math.max(18, Math.min(30, Math.round(correctScore - wrongAnswers)));
+  const missingAnswers = Math.max(0, maxCorrectAnswers - correctAnswers);
+  const score = Math.max(18, Math.min(30, 30 - wrongAnswers - missingAnswers));
   return {
     hasLode: perfectRun,
     label: perfectRun ? "30 e lode" : score.toString(),
-    maxCorrectAnswers,
+    completedChallenges: correctAnswers,
     score
   };
 }
@@ -664,6 +660,14 @@ function getTrophy(grade) {
       message: "La commissione si alza in piedi. Qualcuno propone di farvi direttamente tutor."
     };
   }
+  if (grade.score === 30) {
+    return {
+      className: "is-gold",
+      icon: "★",
+      title: "Trofeo 30 pulito",
+      message: "Niente lode, ma libretto splendente. La commissione annuisce con moderato entusiasmo."
+    };
+  }
   if (grade.score >= 28) {
     return {
       className: "is-gold",
@@ -672,7 +676,7 @@ function getTrophy(grade) {
       message: "Prestazione brillante: avete perso la lode per un dettaglio, probabilmente colpa della burocrazia."
     };
   }
-  if (grade.score >= 24) {
+  if (grade.score >= 25) {
     return {
       className: "is-silver",
       icon: "◆",
@@ -680,7 +684,7 @@ function getTrophy(grade) {
       message: "Ottima media, passo deciso e panico sotto controllo. Il campus vi saluta con rispetto."
     };
   }
-  if (grade.score >= 18) {
+  if (grade.score >= 21) {
     return {
       className: "is-bronze",
       icon: "●",
@@ -691,8 +695,8 @@ function getTrophy(grade) {
   return {
     className: "is-green",
     icon: "✓",
-    title: "Trofeo ci ripenso a settembre",
-    message: "Avete finito vivi, che è già un risultato amministrativamente valido."
+    title: "Trofeo 18 politico",
+    message: "Ok, il prof è stato buono: vi fa passare con 18. Non fate domande e firmate il verbale."
   };
 }
 
