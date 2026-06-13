@@ -627,6 +627,14 @@ h1 {
   margin-top: 4px;
 }
 
+.score-submit-status {
+  min-height: 1.2em;
+  margin: 0;
+  color: var(--mint);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
 .letter-board {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

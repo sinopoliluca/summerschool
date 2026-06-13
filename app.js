@@ -123,6 +123,8 @@ const steps = [
   }
 ];
 
+const SCORE_WEB_APP_URL = "";
+
 const appShell = document.querySelector("#appShell");
 const introScreen = document.querySelector("#introScreen");
 const gameScreen = document.querySelector("#gameScreen");
@@ -630,7 +632,8 @@ function renderFinalTrophy() {
       <button class="next-button" type="button" id="showScoreForm">Invia il tuo punteggio</button>
       <form class="score-submit-form is-hidden" id="scoreSubmitForm">
         <input class="text-input" id="groupNameInput" type="text" autocomplete="off" placeholder="Nome del gruppo" aria-label="Nome del gruppo" required>
-        <button class="text-submit" type="submit">Invia email</button>
+        <button class="text-submit" type="submit" id="scoreSubmitButton">Invia punteggio</button>
+        <p class="score-submit-status" id="scoreSubmitStatus" aria-live="polite"></p>
       </form>
     </div>
   `);
@@ -641,24 +644,50 @@ function setupScoreSubmit(grade) {
   const showButton = contentPanel.querySelector("#showScoreForm");
   const form = contentPanel.querySelector("#scoreSubmitForm");
   const input = contentPanel.querySelector("#groupNameInput");
+  const submitButton = contentPanel.querySelector("#scoreSubmitButton");
+  const status = contentPanel.querySelector("#scoreSubmitStatus");
 
   showButton.addEventListener("click", () => {
     showButton.classList.add("is-hidden");
     form.classList.remove("is-hidden");
   });
 
-  form.addEventListener("submit", event => {
+  form.addEventListener("submit", async event => {
     event.preventDefault();
     const groupName = input.value.trim();
     if (!groupName) return;
-    const subject = `Punteggio Escape Room - ${groupName}`;
-    const body = [
-      `Nome gruppo: ${groupName}`,
-      `Voto finale: ${grade.label}${grade.hasLode ? "" : "/30"}`,
-      `Risposte corrette al primo colpo: ${firstTryCorrectAnswers}/${grade.totalAnswers}`,
-      `Tentativi errati: ${wrongAnswers}`
-    ].join("\n");
-    window.location.href = `mailto:orientamento@adm.unifi.it?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    if (!SCORE_WEB_APP_URL) {
+      status.textContent = "Invio online non ancora configurato: manca l'URL della Web App Google.";
+      return;
+    }
+
+    const payload = {
+      groupName,
+      finalGrade: `${grade.label}${grade.hasLode ? "" : "/30"}`,
+      firstTryCorrectAnswers,
+      totalAnswers: grade.totalAnswers,
+      wrongAnswers
+    };
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Invio...";
+    status.textContent = "";
+
+    try {
+      await fetch(SCORE_WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      status.textContent = "Punteggio inviato. Mostrate questa schermata al tutor per conferma.";
+      submitButton.textContent = "Inviato";
+    } catch (error) {
+      submitButton.disabled = false;
+      submitButton.textContent = "Invia punteggio";
+      status.textContent = "Invio non riuscito. Controllate la connessione e riprovate.";
+    }
   });
 }
 
