@@ -621,10 +621,41 @@ function renderFinalTrophy() {
       <p class="support-text">Esame finale verbalizzato</p>
       <h3 class="prompt">${escapeHtml(trophy.title)}</h3>
       <p class="score-value">${escapeHtml(grade.label)}${grade.hasLode ? "" : "<span>/30</span>"}</p>
-      <p class="score-details">Prove superate: ${grade.completedChallenges} · Malus: ${wrongAnswers}</p>
+      <p class="score-details">Risposte corrette: ${correctAnswers}/${grade.totalAnswers} · Tentativi errati: ${wrongAnswers}</p>
       <p class="message">${escapeHtml(trophy.message)}</p>
+      <button class="next-button" type="button" id="showScoreForm">Invia il tuo punteggio</button>
+      <form class="score-submit-form is-hidden" id="scoreSubmitForm">
+        <input class="text-input" id="groupNameInput" type="text" autocomplete="off" placeholder="Nome del gruppo" aria-label="Nome del gruppo" required>
+        <button class="text-submit" type="submit">Invia email</button>
+      </form>
     </div>
   `);
+  setupScoreSubmit(grade);
+}
+
+function setupScoreSubmit(grade) {
+  const showButton = contentPanel.querySelector("#showScoreForm");
+  const form = contentPanel.querySelector("#scoreSubmitForm");
+  const input = contentPanel.querySelector("#groupNameInput");
+
+  showButton.addEventListener("click", () => {
+    showButton.classList.add("is-hidden");
+    form.classList.remove("is-hidden");
+  });
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    const groupName = input.value.trim();
+    if (!groupName) return;
+    const subject = `Punteggio Escape Room - ${groupName}`;
+    const body = [
+      `Nome gruppo: ${groupName}`,
+      `Voto finale: ${grade.label}${grade.hasLode ? "" : "/30"}`,
+      `Risposte corrette: ${correctAnswers}/${grade.totalAnswers}`,
+      `Tentativi errati: ${wrongAnswers}`
+    ].join("\n");
+    window.location.href = `mailto:orientamento@adm.unifi.it?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  });
 }
 
 function calculateFinalGrade() {
@@ -635,7 +666,7 @@ function calculateFinalGrade() {
   return {
     hasLode: perfectRun,
     label: perfectRun ? "30 e lode" : score.toString(),
-    completedChallenges: correctAnswers,
+    totalAnswers: maxCorrectAnswers,
     score
   };
 }
