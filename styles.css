@@ -482,6 +482,174 @@ h1 {
 .spaghetti-stars span:nth-child(3) { left: 18%; bottom: 24%; animation-delay: 420ms; }
 .spaghetti-stars span:nth-child(4) { right: 20%; bottom: 18%; animation-delay: 520ms; }
 
+.mini-unlock {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.mini-unlock-art {
+  position: relative;
+  width: min(56vw, 210px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 45%, rgba(255, 215, 122, 0.2), rgba(255, 255, 255, 0.06) 62%, rgba(0, 0, 0, 0.18));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 18px 42px rgba(0, 0, 0, 0.32);
+  animation: miniArtPop 520ms cubic-bezier(.2, 1.35, .35, 1) both;
+}
+
+.inclusion-ring {
+  position: absolute;
+  inset: 20%;
+  border: 3px dashed rgba(170, 241, 210, 0.7);
+  border-radius: 50%;
+  animation: inclusionSpin 1200ms ease-in-out both;
+}
+
+.person,
+.person-core {
+  position: absolute;
+  width: 36px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 18px 0 -7px rgba(170, 241, 210, 0.95);
+  animation: personGather 900ms ease-out both;
+}
+
+.person-a { left: 18%; top: 26%; --x: 46px; --y: 28px; background: var(--gold); }
+.person-b { right: 18%; top: 26%; --x: -46px; --y: 28px; background: #f7f1da; }
+.person-c { left: 41%; bottom: 16%; --x: 0; --y: -50px; background: var(--coral); }
+
+.person-core {
+  left: 50%;
+  top: 50%;
+  width: 42px;
+  background: radial-gradient(circle, #fff8d7, var(--gold));
+  box-shadow: 0 0 0 12px rgba(255, 215, 122, 0.16);
+  transform: translate(-50%, -50%) scale(0);
+  animation: corePulse 900ms 380ms ease-out both;
+}
+
+.library-art {
+  border-radius: 10px;
+}
+
+.library-lamp {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 58px;
+  height: 44px;
+  border-radius: 999px 999px 10px 10px;
+  background: linear-gradient(180deg, var(--gold), #d79f34);
+  transform: translateX(-50%);
+  animation: lampGlow 1150ms ease-in-out both;
+}
+
+.library-lamp::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 38px;
+  width: 5px;
+  height: 58px;
+  background: #f7f1da;
+  transform: translateX(-50%);
+}
+
+.book-page {
+  position: absolute;
+  bottom: 22%;
+  width: 42%;
+  height: 36%;
+  background: #fff7d9;
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: inset 0 -8px 0 rgba(215, 159, 52, 0.18);
+  transform-origin: bottom center;
+  animation: pageOpen 820ms ease-out both;
+}
+
+.page-left { left: 11%; --tilt: -8deg; }
+.page-right { right: 11%; --tilt: 8deg; animation-delay: 90ms; }
+
+.book-line {
+  position: absolute;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(6, 16, 13, 0.35);
+  animation: lineWrite 820ms 360ms ease-out both;
+}
+
+.line-a { left: 22%; bottom: 40%; width: 22%; }
+.line-b { right: 22%; bottom: 40%; width: 22%; animation-delay: 450ms; }
+.line-c { left: 31%; bottom: 32%; width: 38%; animation-delay: 540ms; }
+
+.night-art {
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(16, 39, 53, 0.92), rgba(4, 15, 17, 0.96));
+}
+
+.night-moon {
+  position: absolute;
+  right: 18%;
+  top: 13%;
+  width: 38px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff7d9;
+  box-shadow: -10px 0 0 #102735;
+  animation: moonRise 900ms ease-out both;
+}
+
+.night-star {
+  position: absolute;
+  width: 9px;
+  aspect-ratio: 1;
+  background: var(--gold);
+  clip-path: polygon(50% 0, 60% 38%, 100% 50%, 60% 62%, 50% 100%, 40% 62%, 0 50%, 40% 38%);
+  animation: starBurst 1000ms ease-out both;
+}
+
+.star-a { left: 20%; top: 18%; animation-delay: 240ms; }
+.star-b { right: 35%; top: 28%; animation-delay: 360ms; }
+
+.night-lamp {
+  position: absolute;
+  left: 22%;
+  bottom: 25%;
+  width: 40px;
+  height: 62px;
+  border-radius: 10px 10px 4px 4px;
+  background: var(--mint);
+  transform: rotate(-10deg);
+  animation: lampTilt 850ms ease-out both;
+}
+
+.night-light {
+  position: absolute;
+  left: 19%;
+  bottom: 18%;
+  width: 108px;
+  height: 70px;
+  background: radial-gradient(ellipse at top left, rgba(255, 215, 122, 0.58), transparent 68%);
+  animation: studyGlow 1150ms 250ms ease-out both;
+}
+
+.night-book {
+  position: absolute;
+  right: 17%;
+  bottom: 22%;
+  width: 92px;
+  height: 42px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #fff7d9 0 48%, #ead9a8 49% 52%, #fff7d9 53%);
+  transform: perspective(120px) rotateX(28deg);
+  animation: bookSettle 820ms ease-out both;
+}
+
 .text-submit,
 .next-button {
   color: #06100d;
@@ -895,6 +1063,141 @@ h1 {
   100% {
     opacity: 0;
     transform: translateY(-24px) scale(0.4) rotate(180deg);
+  }
+}
+
+@keyframes miniArtPop {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.74);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes inclusionSpin {
+  0% {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.65);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(180deg) scale(1);
+  }
+}
+
+@keyframes personGather {
+  0% {
+    opacity: 0;
+    transform: translate(calc(var(--x) * -1), calc(var(--y) * -1)) scale(0.65);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(calc(var(--x) * 0.08), calc(var(--y) * 0.08)) scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes corePulse {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.1);
+  }
+  65% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes lampGlow {
+  0% {
+    opacity: 0;
+    filter: brightness(0.7);
+    transform: translateX(-50%) translateY(-18px);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1.15);
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes pageOpen {
+  0% {
+    opacity: 0;
+    transform: rotateY(78deg) scale(0.82);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateY(0) rotate(var(--tilt, 0deg)) scale(1);
+  }
+}
+
+@keyframes lineWrite {
+  0% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes moonRise {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes lampTilt {
+  0% {
+    opacity: 0;
+    transform: translateX(-18px) rotate(-28deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) rotate(-10deg);
+  }
+}
+
+@keyframes studyGlow {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bookSettle {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) perspective(120px) rotateX(45deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) perspective(120px) rotateX(28deg);
   }
 }
 

@@ -123,7 +123,7 @@ const steps = [
   }
 ];
 
-const SCORE_WEB_APP_URL = "";
+const SCORE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwSBu0vvTWaAKgG-IBgyy2gjDt2vmLhilL7g095YIerbl-ZiDNws_O_miDGpxMq4qtZLw/exec";
 
 const appShell = document.querySelector("#appShell");
 const introScreen = document.querySelector("#introScreen");
@@ -312,6 +312,14 @@ function setupTextAnswer(step, successMessage = null) {
         renderSpaghettiUnlock(() => advance(false));
         return;
       }
+      if (sameAnswer(step.answer, "INCLUSIONE")) {
+        renderUnlockAnimation("inclusion", "Inclusione sbloccata.", () => advance(false));
+        return;
+      }
+      if (sameAnswer(step.answer, "BIBLIOTECA")) {
+        renderUnlockAnimation("library", "Biblioteca localizzata.", () => renderSuccess(successMessage, () => advance()));
+        return;
+      }
       if (successMessage) {
         renderSuccess(successMessage, () => advance());
       } else {
@@ -360,6 +368,51 @@ function renderSpaghettiUnlock(onComplete) {
   window.setTimeout(onComplete, 1550);
 }
 
+function renderUnlockAnimation(type, title, onComplete) {
+  currentView = { kind: "unlockAnimation", type, title };
+  const titleText = escapeHtml(title);
+  const animationMarkup = {
+    inclusion: `
+      <div class="mini-unlock-art inclusion-art" aria-hidden="true">
+        <span class="inclusion-ring"></span>
+        <span class="person person-a"></span>
+        <span class="person person-b"></span>
+        <span class="person person-c"></span>
+        <span class="person-core"></span>
+      </div>
+    `,
+    library: `
+      <div class="mini-unlock-art library-art" aria-hidden="true">
+        <span class="library-lamp"></span>
+        <span class="book-page page-left"></span>
+        <span class="book-page page-right"></span>
+        <span class="book-line line-a"></span>
+        <span class="book-line line-b"></span>
+        <span class="book-line line-c"></span>
+      </div>
+    `,
+    night: `
+      <div class="mini-unlock-art night-art" aria-hidden="true">
+        <span class="night-moon"></span>
+        <span class="night-star star-a"></span>
+        <span class="night-star star-b"></span>
+        <span class="night-lamp"></span>
+        <span class="night-book"></span>
+        <span class="night-light"></span>
+      </div>
+    `
+  }[type];
+
+  contentPanel.innerHTML = panel(`
+    <div class="mini-unlock ${type}-unlock" aria-live="polite">
+      ${animationMarkup}
+      <p class="eyebrow">Risposta sbloccata</p>
+      <h3 class="prompt">${titleText}</h3>
+    </div>
+  `);
+  window.setTimeout(onComplete, 1450);
+}
+
 function setupTimeAnswer(step) {
   const form = contentPanel.querySelector("#textForm");
   const inputs = [...contentPanel.querySelectorAll(".time-code-input")];
@@ -386,7 +439,7 @@ function setupTimeAnswer(step) {
     if (submitted === step.answer) {
       pushHistory();
       recordCorrectAnswer();
-      advance(false);
+      renderUnlockAnimation("night", "Sessione serale approvata.", () => advance(false));
     } else {
       recordWrongAnswer();
       feedback.textContent = "Ops, ritenta!";
