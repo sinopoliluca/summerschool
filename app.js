@@ -116,10 +116,10 @@ const steps = [
   {
     type: "wordPuzzle",
     cycle: "Missione 4 - Il boss finale",
-    title: "Orientamento scomposto",
-    prompt: "Le lettere sono andate nel panico da open day. Rimettetele in ordine.",
-    scrambled: ["M", "E", "T", "O", "R", "I", "N", "A", "T", "O", "E", "N"],
-    answer: "ORIENTAMENTO"
+    title: "Immatricolazione scomposta",
+    prompt: "Le lettere sono andate nel panico da summer school. Rimettetele in ordine.",
+    scrambled: ["T", "I", "M", "A", "L", "I", "O", "T", "M", "R", "C", "A", "I"],
+    answer: "IMMATRICOLATI"
   }
 ];
 
@@ -240,6 +240,10 @@ function renderQuizSequence(step) {
 }
 
 function renderPassword(step) {
+  if (step.placeholder === "__:__") {
+    renderTimePassword(step);
+    return;
+  }
   currentView = { kind: "password" };
   const placeholder = step.placeholder || "Password";
   contentPanel.innerHTML = panel(`
@@ -253,10 +257,29 @@ function renderPassword(step) {
   setupTextAnswer(step);
 }
 
+function renderTimePassword(step) {
+  currentView = { kind: "password" };
+  contentPanel.innerHTML = panel(`
+    <h3 class="prompt">${escapeHtml(step.prompt)}</h3>
+    <form class="text-form" id="textForm">
+      <div class="time-code" aria-label="Codice orario">
+        <input class="time-code-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-label="Prima cifra ora">
+        <input class="time-code-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-label="Seconda cifra ora">
+        <span class="time-code-separator" aria-hidden="true">:</span>
+        <input class="time-code-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-label="Prima cifra minuti">
+        <input class="time-code-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" aria-label="Seconda cifra minuti">
+      </div>
+      <button class="text-submit" type="submit">Sblocca</button>
+    </form>
+    <p class="feedback" id="feedback"></p>
+  `);
+  setupTimeAnswer(step);
+}
+
 function renderFillBlank(step) {
   currentView = { kind: "fillBlank" };
   contentPanel.innerHTML = panel(`
-    <h3 class="prompt">${escapeHtml(step.prompt)}</h3>
+    <h3 class="prompt prompt-long">${escapeHtml(step.prompt)}</h3>
     <p class="support-text">${escapeHtml(step.placeholder)}</p>
     <form class="text-form" id="textForm">
       <input class="text-input" id="textInput" type="text" autocomplete="off" placeholder="Scrivi la risposta" aria-label="Risposta">
@@ -280,6 +303,10 @@ function setupTextAnswer(step, successMessage = null) {
     if (submitted === expected) {
       pushHistory();
       recordCorrectAnswer();
+      if (sameAnswer(step.answer, "SPAGHETTI")) {
+        renderSpaghettiUnlock(() => advance(false));
+        return;
+      }
       if (successMessage) {
         renderSuccess(successMessage, () => advance());
       } else {
@@ -302,40 +329,68 @@ function setupTextAnswer(step, successMessage = null) {
   });
 }
 
-function renderMessage(step) {
-  currentView = { kind: "message" };
-  renderSuccess(step.message, () => advance(), false, step.buttonLabel || "Avanti");
+function renderSpaghettiUnlock(onComplete) {
+  currentView = { kind: "spaghettiUnlock" };
+  contentPanel.innerHTML = panel(`
+    <div class="spaghetti-unlock" aria-live="polite">
+      <div class="spaghetti-stars" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="spaghetti-plate" aria-hidden="true">
+        <div class="spaghetti-noodles">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="spaghetti-sauce"></div>
+        <div class="spaghetti-fork"></div>
+      </div>
+      <p class="eyebrow">Password sbloccata</p>
+      <h3 class="prompt">Spaghetti mode attivata.</h3>
+    </div>
+  `);
+  window.setTimeout(onComplete, 1550);
 }
 
-function renderWordPuzzle(step) {
-  currentView = { kind: "wordPuzzle" };
-  contentPanel.innerHTML = panel(`
-    <p class="support-text">Boss finale</p>
-    <h3 class="prompt">${escapeHtml(step.prompt)}</h3>
-    <div class="letter-board" aria-label="Lettere scombinate">
-      ${step.scrambled.map(letter => `<span class="letter-tile">${escapeHtml(letter)}</span>`).join("")}
-    </div>
-    <form class="text-form" id="textForm">
-      <input class="text-input" id="textInput" type="text" inputmode="text" autocomplete="off" placeholder="Scrivi la parola" aria-label="Parola ricomposta">
-      <button class="text-submit" type="submit">Conferma</button>
-    </form>
-    <p class="feedback" id="feedback"></p>
-  `);
-
+function setupTimeAnswer(step) {
   const form = contentPanel.querySelector("#textForm");
-  const input = contentPanel.querySelector("#textInput");
+  const inputs = [...contentPanel.querySelectorAll(".time-code-input")];
   const feedback = contentPanel.querySelector("#feedback");
-  input.focus();
+  inputs[0].focus();
+
+  inputs.forEach((input, index) => {
+    input.addEventListener("input", () => {
+      input.value = input.value.replace(/\D/g, "").slice(0, 1);
+      if (input.value && index < inputs.length - 1) {
+        inputs[index + 1].focus();
+      }
+    });
+
+    input.addEventListener("keydown", event => {
+      if (event.key === "Backspace" && !input.value && index > 0) {
+        inputs[index - 1].focus();
+      }
+    });
+  });
+
   form.addEventListener("submit", event => {
     event.preventDefault();
-    if (sameAnswer(input.value, step.answer)) {
+    const submitted = `${inputs[0].value}${inputs[1].value}:${inputs[2].value}${inputs[3].value}`;
+    if (submitted === step.answer) {
       pushHistory();
       recordCorrectAnswer();
-      renderFinalTrophy();
+      advance(false);
     } else {
       recordWrongAnswer();
-      feedback.textContent = "Quasi, ma l'orientamento è ancora disorientato.";
-      input.select();
+      feedback.textContent = "Ops, ritenta!";
+      inputs.forEach(input => {
+        input.value = "";
+      });
+      inputs[0].focus();
       form.animate(
         [
           { transform: "translateX(0)" },
@@ -346,6 +401,67 @@ function renderWordPuzzle(step) {
         { duration: 240 }
       );
     }
+  });
+}
+
+function renderMessage(step) {
+  currentView = { kind: "message" };
+  renderSuccess(step.message, () => advance(), false, step.buttonLabel || "Avanti");
+}
+
+function renderWordPuzzle(step) {
+  currentView = { kind: "wordPuzzle" };
+  const letters = step.currentLetters || step.scrambled;
+  const errorMessage = step.errorMessage || "";
+  contentPanel.innerHTML = panel(`
+    <p class="support-text">Boss finale</p>
+    <h3 class="prompt">${escapeHtml(step.prompt)}</h3>
+    <p class="support-text">Cliccate le lettere una alla volta per comporre la parola.</p>
+    <div class="word-slots" id="wordSlots" aria-label="Parola ricomposta">
+      ${step.answer.split("").map(() => `<span class="word-slot"></span>`).join("")}
+    </div>
+    <div class="letter-board" aria-label="Lettere scombinate">
+      ${letters.map((letter, index) => `<button class="letter-tile" type="button" data-index="${index}" data-letter="${escapeHtml(letter)}">${escapeHtml(letter)}</button>`).join("")}
+    </div>
+    <p class="feedback" id="feedback">${escapeHtml(errorMessage)}</p>
+  `);
+
+  const selectedLetters = [];
+  const slots = contentPanel.querySelectorAll(".word-slot");
+  const feedback = contentPanel.querySelector("#feedback");
+  contentPanel.querySelectorAll(".letter-tile").forEach(button => {
+    button.addEventListener("click", () => {
+      const letter = button.dataset.letter;
+      selectedLetters.push(letter);
+      slots[selectedLetters.length - 1].textContent = letter;
+      button.disabled = true;
+      button.classList.add("is-used");
+
+      if (selectedLetters.length < step.answer.length) return;
+
+      if (sameAnswer(selectedLetters.join(""), step.answer)) {
+        pushHistory();
+        recordCorrectAnswer();
+        renderFinalTrophy();
+        return;
+      }
+
+      recordWrongAnswer();
+      const failedAttempts = (step.failedAttempts || 0) + 1;
+      const hint = failedAttempts >= 3 ? " Suggerimento: è quello che fai quando diventi ufficialmente studentessa o studente." : "";
+      const nextErrorMessage = `Tentativo creativo, ma il portale studenti ha respinto la domanda. Riproviamo con nuove lettere!${hint}`;
+      feedback.textContent = nextErrorMessage;
+      const board = contentPanel.querySelector(".letter-board");
+      slots.forEach(slot => {
+        slot.textContent = "";
+      });
+      contentPanel.querySelectorAll(".letter-tile").forEach(tile => {
+        tile.disabled = false;
+        tile.classList.remove("is-used");
+      });
+      board.classList.add("is-shuffling");
+      window.setTimeout(() => renderWordPuzzle({ ...step, currentLetters: shuffleLetters(step.answer), errorMessage: nextErrorMessage, failedAttempts }), 760);
+    });
   });
 }
 
@@ -420,8 +536,8 @@ function updateStress(step) {
   if (fill) fill.style.width = `${percent}%`;
   if (label) label.textContent = `${Math.round(percent)}%`;
 
-  appShell.classList.toggle("shake-low", percent >= 10 && percent < 30);
-  appShell.classList.toggle("shake-mid", percent >= 30 && percent < 60);
+  appShell.classList.toggle("shake-low", percent >= 01 && percent < 20);
+  appShell.classList.toggle("shake-mid", percent >= 20 && percent < 60);
   appShell.classList.toggle("shake-high", percent >= 60);
 
   if (percent >= 100) {
@@ -480,10 +596,11 @@ function disableCurrentChoices() {
 function renderSuccess(message, onNext, badge = false, label = "Avanti") {
   currentView = { kind: "success", message, badge, label };
   const badgeMarkup = badge ? document.querySelector("#spaghettiBadgeTemplate").innerHTML : "";
+  const messageClass = badge ? "message message-compact" : "message";
   contentPanel.innerHTML = panel(`
     <div class="success-box">
       ${badgeMarkup}
-      <p class="message">${escapeHtml(message).replace(/\n/g, "<br>")}</p>
+      <p class="${messageClass}">${escapeHtml(message).replace(/\n/g, "<br>")}</p>
       <button class="next-button" type="button" id="nextButton">${escapeHtml(label)}</button>
     </div>
   `);
@@ -585,6 +702,15 @@ function recordCorrectAnswer() {
 
 function recordWrongAnswer(amount = 1) {
   wrongAnswers += amount;
+}
+
+function shuffleLetters(word) {
+  const letters = word.split("");
+  for (let index = letters.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [letters[index], letters[randomIndex]] = [letters[randomIndex], letters[index]];
+  }
+  return sameAnswer(letters.join(""), word) ? shuffleLetters(word) : letters;
 }
 
 function setupBadgeZoom() {
