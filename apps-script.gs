@@ -17,9 +17,69 @@ function doPost(e) {
     signature
   ]);
 
+  updateWinnerFormatting_(sheet);
+
   return ContentService
     .createTextOutput(JSON.stringify({ ok: true }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function aggiornaVincitore() {
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+  updateWinnerFormatting_(sheet);
+}
+
+function updateWinnerFormatting_(sheet) {
+  const lastRow = sheet.getLastRow();
+  const lastColumn = 7;
+
+  if (lastRow < 2) return;
+
+  const dataRange = sheet.getRange(2, 1, lastRow - 1, lastColumn);
+  dataRange
+    .setBackground(null)
+    .setFontColor(null)
+    .setFontWeight("normal");
+
+  const rows = dataRange.getValues();
+  let winner = null;
+
+  rows.forEach((row, index) => {
+    const entry = {
+      rowNumber: index + 2,
+      timestamp: row[0] instanceof Date ? row[0].getTime() : new Date(row[0]).getTime(),
+      grade: parseGrade_(row[2]),
+      wrongAnswers: Number(row[5]) || 0
+    };
+
+    if (!winner || isBetterEntry_(entry, winner)) {
+      winner = entry;
+    }
+  });
+
+  if (!winner) return;
+
+  sheet.getRange(winner.rowNumber, 1, 1, lastColumn)
+    .setBackground("#1f7a4d")
+    .setFontColor("#ffffff")
+    .setFontWeight("bold");
+}
+
+function isBetterEntry_(entry, currentWinner) {
+  if (entry.grade !== currentWinner.grade) {
+    return entry.grade > currentWinner.grade;
+  }
+  if (entry.wrongAnswers !== currentWinner.wrongAnswers) {
+    return entry.wrongAnswers < currentWinner.wrongAnswers;
+  }
+  return entry.timestamp < currentWinner.timestamp;
+}
+
+function parseGrade_(value) {
+  const grade = String(value || "").toLowerCase();
+  if (grade.indexOf("lode") !== -1) return 31;
+  const match = grade.match(/\d+/);
+  return match ? Number(match[0]) : 0;
 }
 
 function createSignature_(timestamp, data) {

@@ -650,6 +650,85 @@ h1 {
   animation: bookSettle 820ms ease-out both;
 }
 
+.enterprise-art {
+  overflow: hidden;
+  background: radial-gradient(circle at 58% 35%, rgba(255, 215, 122, 0.24), rgba(170, 241, 210, 0.1) 48%, rgba(4, 15, 17, 0.92));
+}
+
+.enterprise-rocket {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  width: 42px;
+  height: 86px;
+  border-radius: 50% 50% 16px 16px;
+  background: linear-gradient(180deg, #f7f1da 0 56%, var(--mint) 57%);
+  box-shadow: inset 0 -14px 0 rgba(6, 16, 13, 0.14);
+  transform: translate(-50%, 44px) rotate(-12deg);
+  animation: rocketLaunch 1250ms ease-out both;
+}
+
+.enterprise-rocket::before,
+.enterprise-rocket::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  width: 18px;
+  height: 28px;
+  border-radius: 12px 12px 4px 4px;
+  background: var(--coral);
+}
+
+.enterprise-rocket::before {
+  left: -12px;
+  transform: rotate(16deg);
+}
+
+.enterprise-rocket::after {
+  right: -12px;
+  transform: rotate(-16deg);
+}
+
+.enterprise-window {
+  position: absolute;
+  left: 50%;
+  top: 33%;
+  width: 18px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 4px rgba(6, 16, 13, 0.2);
+  transform: translateX(-50%);
+  animation: windowPulse 900ms 320ms ease-out both;
+}
+
+.enterprise-flame {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  width: 34px;
+  height: 58px;
+  border-radius: 50% 50% 50% 50%;
+  background: linear-gradient(180deg, var(--gold), var(--coral));
+  transform: translateX(-50%) scaleY(0.2);
+  transform-origin: top center;
+  animation: flameBoost 900ms 520ms ease-out both;
+}
+
+.enterprise-chart {
+  position: absolute;
+  bottom: 18%;
+  width: 18px;
+  border-radius: 6px 6px 0 0;
+  background: rgba(170, 241, 210, 0.82);
+  transform-origin: bottom center;
+  animation: chartGrow 860ms ease-out both;
+}
+
+.chart-a { left: 19%; height: 34px; animation-delay: 360ms; }
+.chart-b { left: 29%; height: 56px; animation-delay: 460ms; background: rgba(255, 215, 122, 0.88); }
+.chart-c { right: 20%; height: 76px; animation-delay: 560ms; background: rgba(255, 119, 97, 0.88); }
+
 .text-submit,
 .next-button {
   color: #06100d;
@@ -1198,6 +1277,62 @@ h1 {
   100% {
     opacity: 1;
     transform: translateY(0) perspective(120px) rotateX(28deg);
+  }
+}
+
+@keyframes rocketLaunch {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 46px) rotate(-16deg) scale(0.78);
+  }
+  65% {
+    opacity: 1;
+    transform: translate(-50%, -8px) rotate(-8deg) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) rotate(-10deg) scale(1);
+  }
+}
+
+@keyframes windowPulse {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.3);
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.18);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+@keyframes flameBoost {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0.15);
+  }
+  55% {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1.1);
+  }
+  100% {
+    opacity: 0.85;
+    transform: translateX(-50%) scaleY(0.82);
+  }
+}
+
+@keyframes chartGrow {
+  0% {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
   }
 }
 

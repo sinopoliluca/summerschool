@@ -327,6 +327,10 @@ function setupTextAnswer(step, successMessage = null) {
         renderUnlockAnimation("library", "Biblioteca localizzata.", () => renderSuccess(successMessage, () => advance()));
         return;
       }
+      if (sameAnswer(step.answer, "IMPRESA")) {
+        renderUnlockAnimation("enterprise", "Impresa avviata.", () => advance(false));
+        return;
+      }
       if (successMessage) {
         renderSuccess(successMessage, () => advance());
       } else {
@@ -372,7 +376,7 @@ function renderSpaghettiUnlock(onComplete) {
       <h3 class="prompt">Spaghetti mode attivata.</h3>
     </div>
   `);
-  window.setTimeout(onComplete, 1550);
+  window.setTimeout(onComplete, 3200);
 }
 
 function renderUnlockAnimation(type, title, onComplete) {
@@ -407,6 +411,16 @@ function renderUnlockAnimation(type, title, onComplete) {
         <span class="night-book"></span>
         <span class="night-light"></span>
       </div>
+    `,
+    enterprise: `
+      <div class="mini-unlock-art enterprise-art" aria-hidden="true">
+        <span class="enterprise-rocket"></span>
+        <span class="enterprise-window"></span>
+        <span class="enterprise-flame"></span>
+        <span class="enterprise-chart chart-a"></span>
+        <span class="enterprise-chart chart-b"></span>
+        <span class="enterprise-chart chart-c"></span>
+      </div>
     `
   }[type];
 
@@ -417,7 +431,7 @@ function renderUnlockAnimation(type, title, onComplete) {
       <h3 class="prompt">${titleText}</h3>
     </div>
   `);
-  window.setTimeout(onComplete, 1450);
+  window.setTimeout(onComplete, 3200);
 }
 
 function setupTimeAnswer(step) {
