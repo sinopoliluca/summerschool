@@ -409,6 +409,7 @@ function renderWordPuzzle(step) {
   currentView = { kind: "wordPuzzle" };
   const letters = step.currentLetters || step.scrambled;
   const errorMessage = step.errorMessage || "";
+  const hintMessage = step.hintMessage || "";
   contentPanel.innerHTML = panel(`
     <p class="support-text">Boss finale</p>
     <h3 class="prompt">${escapeHtml(step.prompt)}</h3>
@@ -419,7 +420,10 @@ function renderWordPuzzle(step) {
     <div class="letter-board" aria-label="Lettere scombinate">
       ${letters.map((letter, index) => `<button class="letter-tile" type="button" data-index="${index}" data-letter="${escapeHtml(letter)}">${escapeHtml(letter)}</button>`).join("")}
     </div>
-    <p class="feedback" id="feedback">${escapeHtml(errorMessage)}</p>
+    <div class="feedback word-feedback" id="feedback">
+      ${hintMessage ? `<p class="hint-message">${escapeHtml(hintMessage)}</p>` : ""}
+      ${errorMessage ? `<p>${escapeHtml(errorMessage)}</p>` : ""}
+    </div>
   `);
 
   const selectedLetters = [];
@@ -444,9 +448,9 @@ function renderWordPuzzle(step) {
 
       recordWrongAnswer();
       const failedAttempts = (step.failedAttempts || 0) + 1;
-      const hint = failedAttempts >= 3 ? " Suggerimento: è quello che fai quando diventi ufficialmente studentessa o studente." : "";
-      const nextErrorMessage = `Tentativo creativo, ma il portale studenti ha respinto la domanda. Riproviamo con nuove lettere!${hint}`;
-      feedback.textContent = nextErrorMessage;
+      const nextHintMessage = failedAttempts >= 3 ? "Suggerimento: è quello che fai quando diventi ufficialmente studentessa o studente." : "";
+      const nextErrorMessage = "Tentativo creativo, ma il portale studenti ha respinto la domanda. Riproviamo con nuove lettere!";
+      feedback.innerHTML = `${nextHintMessage ? `<p class="hint-message">${escapeHtml(nextHintMessage)}</p>` : ""}<p>${escapeHtml(nextErrorMessage)}</p>`;
       const board = contentPanel.querySelector(".letter-board");
       slots.forEach(slot => {
         slot.textContent = "";
@@ -456,7 +460,7 @@ function renderWordPuzzle(step) {
         tile.classList.remove("is-used");
       });
       board.classList.add("is-shuffling");
-      window.setTimeout(() => renderWordPuzzle({ ...step, currentLetters: shuffleLetters(step.answer), errorMessage: nextErrorMessage, failedAttempts }), 760);
+      window.setTimeout(() => renderWordPuzzle({ ...step, currentLetters: shuffleLetters(step.answer), errorMessage: nextErrorMessage, hintMessage: nextHintMessage, failedAttempts }), 760);
     });
   });
 }

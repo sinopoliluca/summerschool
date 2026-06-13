@@ -310,6 +310,20 @@ h1 {
   font-weight: 900;
 }
 
+.word-feedback {
+  display: grid;
+  gap: 6px;
+}
+
+.word-feedback p {
+  margin: 0;
+}
+
+.hint-message {
+  color: var(--coral);
+  text-shadow: 0 0 18px rgba(226, 109, 90, 0.34);
+}
+
 .success-box {
   display: grid;
   gap: 14px;
