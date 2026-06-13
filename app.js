@@ -376,7 +376,7 @@ function renderSpaghettiUnlock(onComplete) {
       <h3 class="prompt">Spaghetti mode attivata.</h3>
     </div>
   `);
-  window.setTimeout(onComplete, 5000);
+  window.setTimeout(onComplete, 10000);
 }
 
 function renderUnlockAnimation(type, title, onComplete) {
@@ -431,7 +431,7 @@ function renderUnlockAnimation(type, title, onComplete) {
       <h3 class="prompt">${titleText}</h3>
     </div>
   `);
-  window.setTimeout(onComplete, 5000);
+  window.setTimeout(onComplete, 10000);
 }
 
 function setupTimeAnswer(step) {
