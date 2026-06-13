@@ -132,8 +132,6 @@ const stepTitle = document.querySelector("#stepTitle");
 const progressFill = document.querySelector("#progressFill");
 const startButton = document.querySelector("#startButton");
 const backButton = document.querySelector("#backButton");
-const fullscreenButton = document.querySelector("#fullscreenButton");
-const fullscreenIcon = document.querySelector("#fullscreenIcon");
 
 let currentStep = 0;
 let sequenceIndex = 0;
@@ -158,12 +156,6 @@ startButton.addEventListener("click", () => {
 });
 
 backButton.addEventListener("click", goBack);
-fullscreenButton.addEventListener("click", toggleFullscreen);
-document.addEventListener("fullscreenchange", updateFullscreenButton);
-window.addEventListener("resize", updateAppHeight);
-if (window.visualViewport) {
-  window.visualViewport.addEventListener("resize", updateAppHeight);
-}
 
 function resetRuntimeState() {
   clearInterval(timerId);
@@ -700,42 +692,6 @@ function updateHeader(step) {
 function updateBackButton() {
   backButton.disabled = historyStack.length === 0;
   backButton.classList.toggle("is-hidden-control", historyStack.length === 0);
-}
-
-async function toggleFullscreen() {
-  const isFullscreen = document.fullscreenElement || appShell.classList.contains("is-window-fullscreen");
-  try {
-    if (isFullscreen) {
-      if (document.fullscreenElement) await document.exitFullscreen();
-      setAppFullscreen(false);
-    } else {
-      setAppFullscreen(true);
-      if (appShell.requestFullscreen) await appShell.requestFullscreen();
-    }
-  } catch {
-    setAppFullscreen(!isFullscreen);
-  }
-  updateFullscreenButton();
-}
-
-function updateFullscreenButton() {
-  const isFullscreen = Boolean(document.fullscreenElement) || appShell.classList.contains("is-window-fullscreen");
-  fullscreenIcon.textContent = isFullscreen ? "×" : "⛶";
-  fullscreenButton.setAttribute("aria-label", isFullscreen ? "Esci da schermo intero" : "Schermo intero");
-}
-
-function setAppFullscreen(enabled) {
-  updateAppHeight();
-  appShell.classList.toggle("is-window-fullscreen", enabled);
-  document.body.classList.toggle("is-app-fullscreen", enabled);
-  if (enabled) {
-    window.setTimeout(() => window.scrollTo(0, 1), 80);
-  }
-}
-
-function updateAppHeight() {
-  const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-  document.documentElement.style.setProperty("--app-height", `${height}px`);
 }
 
 function panel(markup) {
