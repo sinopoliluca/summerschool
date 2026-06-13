@@ -452,7 +452,7 @@ function renderWordPuzzle(step) {
 
       recordWrongAnswer();
       const failedAttempts = (step.failedAttempts || 0) + 1;
-      const nextHintMessage = failedAttempts >= 3 ? "Suggerimento: è quello che fai quando diventi ufficialmente studentessa o studente." : "";
+      const nextHintMessage = failedAttempts >= 3 ? "Suggerimento: un invito a iscriverti" : "";
       const nextErrorMessage = "Tentativo creativo, ma il portale studenti ha respinto la domanda. Riproviamo con nuove lettere!";
       feedback.innerHTML = `${nextHintMessage ? `<p class="hint-message">${escapeHtml(nextHintMessage)}</p>` : ""}<p>${escapeHtml(nextErrorMessage)}</p>`;
       const board = contentPanel.querySelector(".letter-board");
